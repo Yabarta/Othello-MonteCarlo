@@ -10,9 +10,6 @@ class Token:
         self.GAME = main
 
         self.image = image
-    
-    def transition(self):
-        pass
 
     def draw(self, window):
         window.blit(self.image, (self.posX, self.posY))

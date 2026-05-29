@@ -1,5 +1,6 @@
+import subprocess
 import pygame
-from globals import loadImages, loadSpriteSheet, empty, white, black
+from globals import loadImages, loadSpriteSheet, empty, white, black, directions
 from Token import Token
 
 class Grid:
@@ -68,6 +69,11 @@ class Grid:
 
         for token in self.tokens.values():
             token.draw(window)
+
+        availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayer)
+        for move in availMoves:
+            pygame.draw.rect(window , 'White' , (80 + (move[1] *80) +30, 80 + (move[0] * 80) +30 , 20,20))
+        
     
     def printGameLogicBoard(self):
         print('   | A | B | C | D | E | F | G | H |')
@@ -76,7 +82,81 @@ class Grid:
             for item in row:
                 line += f'{item}'.center(3, " ") + '|'
             print(line)
+
         print()
+
+    def findValidCells(self, grid, currentPlayer):
+        validCellToClick = []
+
+        for gridX, row in enumerate(grid):
+            for gridY, col in enumerate(row):
+                if grid[gridX][gridY] != empty:
+                        continue
+                DIRECTIONS = directions(gridX, gridY)
+
+                for direction in DIRECTIONS:
+                    dirX, dirY = direction
+                    checkCell = grid[dirX][dirY]
+
+                    if checkCell == 0 or checkCell == currentPlayer:
+                        continue
+                    if (gridX, gridY) in validCellToClick:
+                        continue
+                    
+
+                    validCellToClick.append((gridX , gridY))
+        return validCellToClick
+
+    def swappableTiles(self, x,y,grid, currentPlayer ):
+        surroundCells = directions(x,y)
+        if len(surroundCells) == 0:
+            return []
+        
+        swappableTiles = []
+
+        for checkCell in surroundCells:
+            checkX , checkY = checkCell
+            difX, difY = checkX -x , checkY - y
+            currentLine = []
+
+            RUN = True
+            while RUN:
+                if grid[checkX][checkY] != currentPlayer and grid[checkX][checkY] != empty:
+                    currentLine.append((checkX, checkY))
+                elif grid[checkX][checkY] == currentPlayer:
+                    RUN = False
+                    break
+                elif grid[checkX][checkY] == empty:
+                    currentLine.clear()
+                    RUN = False
+                checkX += difX
+                checkY += difY
+                
+                if checkX < 0 or checkX >7 or checkY < 0 or checkY > 7:
+                    currentLine.clear()
+                    RUN = False
+            
+            if len(currentLine) > 0:
+                swappableTiles.extend(currentLine)
+        return swappableTiles
+
+    def findAvailMoves(self, grid, currentPlayer):
+        validCells = self.findValidCells(grid, currentPlayer)
+        playableCells = []
+
+        for cell in validCells:
+            x,y = cell
+            if cell in playableCells:
+                continue
+            swapTiles = self.swappableTiles(x,y, grid, currentPlayer)
+
+            if len(swapTiles) >0:
+                playableCells.append(cell)
+
+        return playableCells
+            
+
+                    
 
     def insertToken(self, grid, currentPlayer, y, x):
         tokenImg = self.whitetoken if currentPlayer == white else self.blacktoken

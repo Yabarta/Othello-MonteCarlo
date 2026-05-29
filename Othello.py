@@ -35,14 +35,23 @@ class Othello:
                 if event.button == 3:
                     self.grid.printGameLogicBoard()
 
+
                 if event.button == 1:
                     x, y = pygame.mouse.get_pos()
                     x, y = (x - 80) // 80, (y - 80) // 80
-                    self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, y, x)
-                    if self.currentPlayer == white:
-                        self.currentPlayer = black
-                    else: 
-                        self.currentPlayer = white
+                    validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer)
+                    if not validCells:
+                        pass
+                    else:
+                        if (y,x) in validCells:
+                            self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, y, x)
+                            swappableTiles = self.grid.swappableTiles(y,x ,self.grid.gridLogic , self.currentPlayer)
+                            for tile in swappableTiles:
+                                self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, tile[0], tile[1])
+                            if self.currentPlayer == white:
+                                self.currentPlayer = black
+                            else: 
+                                self.currentPlayer = white
 
     def update(self):
         pass
