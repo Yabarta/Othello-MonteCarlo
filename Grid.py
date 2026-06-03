@@ -1,4 +1,3 @@
-import subprocess
 import pygame
 from globals import loadImages, loadSpriteSheet, empty, white, black, directions
 from Token import Token
@@ -29,8 +28,6 @@ class Grid:
         return imageDict
     
     def createBgImg(self):
-         # Números son 1 para las columnnas bordes, 2 para la última fila y 0 para el resto.
-         # Letras son C y E para las columnas bordes, D para las filas borde y A y B se alternan en el centro como un tablero de ajedrez.
          gridBg = [
             ['C0', 'D0', 'D0', 'D0', 'D0', 'D0', 'D0', 'D0', 'D0', 'F0'],
             ['C1', 'A0', 'B0', 'A0', 'B0', 'A0', 'B0', 'A0', 'B0', 'F1'],

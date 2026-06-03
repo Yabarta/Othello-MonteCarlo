@@ -1,6 +1,7 @@
 import pygame
 from globals import white, black
 from Grid import Grid
+from Node import Node
 
 class Othello:
     def __init__(self):
@@ -54,7 +55,18 @@ class Othello:
                                 self.currentPlayer = white
 
     def update(self):
-        pass
+        if (self.currentPlayer == self.player2):
+            bestMove = Node.UCTSearch(initialState = self.grid.gridLogic, player = self.currentPlayer, availableMoves=self.grid, iterations = 500)
+        
+            if bestMove:
+                y, x = bestMove
+                self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, y, x)
+                swappableTiles = self.grid.swappableTiles(y,x ,self.grid.gridLogic , self.currentPlayer)
+                for tile in swappableTiles:
+                    self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, tile[0], tile[1])
+            
+            self.currentPlayer = self.player1
+            
 
     def draw(self):
         self.screen.fill((0, 0, 0))

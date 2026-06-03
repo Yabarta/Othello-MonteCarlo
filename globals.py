@@ -3,6 +3,7 @@ import pygame
 empty = 0
 white = 1
 black = 2
+MCTSConstant = 1.414
 
 def loadImages(path, size):
     img = pygame.image.load(f'{path}').convert_alpha()
