@@ -19,6 +19,6 @@ model = Sequential([
 
 model.compile(optimizer='adam' , loss='mean_squared_error', metrics=['mae'])
 
-model.fit(X, Y, epochs=10, batch_size=32, validation_split=0.2)
+model.fit(X, Y, epochs=30, batch_size=32, validation_split=0.2)
 
 model.save('modelOthello.keras')

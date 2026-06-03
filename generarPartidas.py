@@ -85,7 +85,7 @@ if __name__ == '__main__':
     all_grids = []
     all_labels = []
 
-    for i in range(100):
+    for i in range(200):
         game = PartidaSimulada()
         grid , label = game.jugarPartida()
         all_grids.extend(grid)

@@ -33,11 +33,11 @@ class Torneo:
             if current_player == color_ia_nueva:
                 # IA NUEVA (Red Neuronal con pocas iteraciones)
                 root = Node(grid=self.grid.gridLogic, player=current_player, availableMoves=self.grid)
-                bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=current_player, availableMoves=self.grid, iterations=50, nn_model=self.nn_model)
+                bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=current_player, availableMoves=self.grid, iterations=100, nn_model=self.nn_model)
             else:
                 # IA VIEJA (MCTS Clásico con muchas iteraciones)
                 root = Node(grid=self.grid.gridLogic, player=current_player, availableMoves=self.grid)
-                bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=current_player, availableMoves=self.grid, iterations=500, nn_model=None)
+                bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=current_player, availableMoves=self.grid, iterations=100, nn_model=None)
             # -------------------------------
 
             if bestMove:
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     victorias_vieja = 0
     empates = 0
     
-    total_partidas = 20
+    total_partidas = 5
     print(f"\n--- INICIANDO TORNEO AL MEJOR DE {total_partidas} PARTIDAS ---")
     print("IA Nueva (Red Neuronal, 50 iteraciones) VS IA Vieja (Aleatorio, 500 iteraciones)")
     print("-" * 50)

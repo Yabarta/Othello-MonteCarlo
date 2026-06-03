@@ -18,3 +18,4 @@ print(f"Resultado: {etiquetas[1]} (+1 Gana, -1 Pierde, 0 Empate)")
 
 # 4. (Opcional) Ver los primeros 5 resultados de golpe
 print("\nPrimeras 5 etiquetas:", etiquetas[:5])
+print(len(estados))
