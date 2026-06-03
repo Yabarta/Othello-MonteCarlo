@@ -5,6 +5,7 @@ import numpy as np
 import copy
 import pygame
 from tensorflow.keras.models import load_model
+import time
 
 class PartidaSimulada:
     def __init__(self):
@@ -49,7 +50,7 @@ class PartidaSimulada:
             turns.append(currentPlayer)
 
             root = Node(grid=self.grid.gridLogic, player=currentPlayer , availableMoves=self.grid)
-            bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=currentPlayer, availableMoves=self.grid, iterations=500)
+            bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=currentPlayer, availableMoves=self.grid, iterations=10, nn_model=self.nn_model)
 
             if bestMove:
                 y, x = bestMove
@@ -84,10 +85,13 @@ class PartidaSimulada:
 if __name__ == '__main__':
     all_grids = []
     all_labels = []
+    inicio = time.time()
 
-    for i in range(200):
+    for i in range(25):
         game = PartidaSimulada()
         grid , label = game.jugarPartida()
+        hola = time.time() - inicio
+        print(i , f"{hola:.4f}")
         all_grids.extend(grid)
         all_labels.extend(label)
     
