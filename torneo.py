@@ -66,7 +66,7 @@ if __name__ == '__main__':
     victorias_vieja = 0
     empates = 0
     
-    total_partidas = 5
+    total_partidas = 20
     print(f"\n--- INICIANDO TORNEO AL MEJOR DE {total_partidas} PARTIDAS ---")
     print("IA Nueva (Red Neuronal, 50 iteraciones) VS IA Vieja (Aleatorio, 500 iteraciones)")
     print("-" * 50)

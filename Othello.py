@@ -87,7 +87,7 @@ class Othello:
 
             rootNode = Node(grid=self.grid.gridLogic, player=self.currentPlayer, availableMoves=self.grid)
 
-            bestMove = rootNode.UCTSearch(initialState = self.grid.gridLogic, player = self.currentPlayer, availableMoves=self.grid, iterations = 50, nn_model=self.nn_model)
+            bestMove = rootNode.UCTSearch(initialState = self.grid.gridLogic, player = self.currentPlayer, availableMoves=self.grid, iterations = 200, nn_model=self.nn_model)
         
             if bestMove:
                 y, x = bestMove
