@@ -2,6 +2,7 @@ from globals import MCTSConstant, white, black
 import random
 import copy
 import math
+import numpy as np
 
 class Node:
     def __init__(self, grid, player, parent = None,  move = None, availableMoves = None):
@@ -16,22 +17,24 @@ class Node:
         self.availableMoves = availableMoves
         self.untriedMoves = self.availableMoves.findAvailMoves(self.grid, self.player)
 
-    def UCTSearch(self, initialState, player, availableMoves, iterations = 500):
+    def UCTSearch(self, initialState, player, availableMoves, iterations = 500, nn_model=None):
         root = Node(grid = initialState, player = player, availableMoves = availableMoves)
 
         for i in range(iterations):
-            node = self.TreePolicy(root)
-            reward = self.DefaultPolicy(node.grid, node.player, root.player, availableMoves)
-            self.Backup = (node, reward)
-        
-        return self.BestChild(root, 0).move
+            node = self.TreePolicy(root , player)
+            reward = self.DefaultPolicy(node.grid, node.player, root.player, availableMoves , nn_model)
+            self.Backup(node, reward)
+        bestNode = self.BestChild(root, 0, player)
+        if bestNode is None:
+            return None
+        return bestNode.move
     
-    def TreePolicy(self, node):
+    def TreePolicy(self, node, rootPlayer):
         while not self.isTerminal(node.grid, node.player, node.availableMoves):
             if len(node.untriedMoves) > 0:
                 return self.Expand(node)
             else:
-                node = self.BestChild(node, MCTSConstant)
+                node = self.BestChild(node, MCTSConstant, rootPlayer)
         return node
     
     def Expand(self, node):
@@ -58,7 +61,7 @@ class Node:
         node.children.append(newNode)
         return newNode
     
-    def BestChild(self, node, const):
+    def BestChild(self, node, const, rootPlayer):
         bestScore = -float('inf')
         bestChildren = []
 
@@ -67,6 +70,10 @@ class Node:
                 score = float('inf')
             else:
                 exploit = child.weight / child.visits
+
+                if node.player != rootPlayer:
+                    exploit = -exploit
+
                 explore = const * math.sqrt(math.log(node.visits) / child.visits) 
                 score = exploit + explore
             
@@ -76,52 +83,81 @@ class Node:
             elif score == bestScore:
                 bestChildren.append(child)
         
-        return random.choice(bestChildren)
+        if (len(bestChildren) == 0):
+            bestChoice = None
+        else:
+            bestChoice = random.choice(bestChildren)
+
+
+        return bestChoice
     
-    def DefaultPolicy(self, grid, playerTurn , rootPlayer, availableMoves):
-        currentGrid = copy.deepcopy(grid)
-        currentPlayer = playerTurn
+    def DefaultPolicy(self, grid, playerTurn , rootPlayer, availableMoves , nn_model=None):
+        if nn_model is None:
+            currentGrid = copy.deepcopy(grid)
+            currentPlayer = playerTurn
 
-        while True:
-            moves = availableMoves.findAvailMoves(currentGrid, currentPlayer)
+            while True:
+                moves = availableMoves.findAvailMoves(currentGrid, currentPlayer)
 
-            if not moves:
+                if not moves:
+                    if currentPlayer == black:
+                        nextPlayer = white
+                    else:
+                        nextPlayer = black
+                    if not availableMoves.findAvailMoves(currentGrid, nextPlayer):
+                        break
+                    else:
+                        currentPlayer = nextPlayer
+                        continue
+                
+                move = random.choice(moves)
+                y, x = move
+                currentGrid[y][x] = currentPlayer
+                tilesToSwap = availableMoves.swappableTiles(y, x, currentGrid, currentPlayer)
+                for tile in tilesToSwap:
+                    currentGrid[tile[0]][tile[1]] = currentPlayer
+                
                 if currentPlayer == black:
-                    nextPlayer = white
+                    currentPlayer = white
                 else:
-                    nextPlayer = black
-                if not availableMoves.findAvailMoves(currentGrid, nextPlayer):
-                    break
-                else:
-                    currentPlayer = nextPlayer
-                    continue
+                    currentPlayer = black
             
-            move = random.choice(moves)
-            y, x = move
-            currentGrid[y][x] = currentPlayer
-            tilesToSwap = availableMoves.swappableTiles(y, x, currentGrid, currentPlayer)
-            for tile in tilesToSwap:
-                currentGrid[tile[0]][tile[1]] = currentPlayer
-            
-            if currentPlayer == black:
-                currentPlayer = white
+            whites = sum(row.count(white) for row in currentGrid)
+            blacks = sum(row.count(black) for row in currentGrid)
+
+            if whites > blacks:
+                winner = white
+            elif whites < blacks:
+                winner = black
             else:
-                currentPlayer = black
+                return 0
+
+            if (winner == rootPlayer):
+                return 1
+            else:
+                return -1
+
+        """ Arriba es sin Red Neuronal por si da error al importarlo"""
+        """ Abajo es con Red Neuronal cuando importa bien"""
+
+        relativeGrid = np.zeros((8, 8))
+        for i in range(8):
+            for j in range(8):
+                if grid[i][j] == playerTurn:
+                    relativeGrid[i][j] = 1 # Mis fichas siempre son 1
+                elif grid[i][j] != 0:
+                    relativeGrid[i][j] = 2
+
+        stateRed = relativeGrid.reshape(1,8,8,1).astype('float32')
+
+        prediction = nn_model(stateRed, training = False)
+        reward = float(prediction[0][0])
+
+        if playerTurn != rootPlayer:
+            reward = -reward
         
-        whites = sum(row.count(white) for row in currentGrid)
-        blacks = sum(row.count(black) for row in currentGrid)
-
-        if whites > blacks:
-            winner = white
-        elif whites < blacks:
-            winner = black
-        else:
-            return 0
-
-        if (winner == rootPlayer):
-            return 1
-        else:
-            return -1
+        return reward
+    
     
     def Backup(self, node, reward):
         while node is not None:

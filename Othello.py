@@ -2,6 +2,7 @@ import pygame
 from globals import white, black
 from Grid import Grid
 from Node import Node
+from tensorflow.keras.models import load_model
 
 class Othello:
     def __init__(self):
@@ -20,6 +21,10 @@ class Othello:
         self.grid = Grid(self.rows, self.columns, (80, 80), self)
 
         self.RUN = True
+        try:
+            self.nn_model = load_model('modelOthello.keras')
+        except:
+            self.nn_model = None
 
     def run(self):
         while self.RUN:
@@ -43,6 +48,7 @@ class Othello:
                     validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer)
                     if not validCells:
                         pass
+
                     else:
                         if (y,x) in validCells:
                             self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, y, x)
@@ -55,8 +61,33 @@ class Othello:
                                 self.currentPlayer = white
 
     def update(self):
+        
+        validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer)
+        
+        if not validCells:
+            if self.currentPlayer == white:
+                nextPlayer = black
+            else: 
+                nextPlayer = white
+            if not self.grid.findAvailMoves(self.grid.gridLogic, nextPlayer):
+                print("Fin del juego")
+                self.RUN = False
+                return
+            else:
+                print(f"El jugador {'Blanco' if self.currentPlayer == white else 'Negro'} no puede mover. Pasa turno.")
+                self.currentPlayer = nextPlayer
+                return
+
         if (self.currentPlayer == self.player2):
-            bestMove = Node.UCTSearch(initialState = self.grid.gridLogic, player = self.currentPlayer, availableMoves=self.grid, iterations = 500)
+
+            validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer)
+            if not validCells:
+                self.currentPlayer = self.player1
+                return
+
+            rootNode = Node(grid=self.grid.gridLogic, player=self.currentPlayer, availableMoves=self.grid)
+
+            bestMove = rootNode.UCTSearch(initialState = self.grid.gridLogic, player = self.currentPlayer, availableMoves=self.grid, iterations = 50, nn_model=self.nn_model)
         
             if bestMove:
                 y, x = bestMove
