@@ -67,9 +67,10 @@ class Grid:
         for token in self.tokens.values():
             token.draw(window)
 
-        availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayer)
-        for move in availMoves:
-            pygame.draw.rect(window , 'White' , (80 + (move[1] *80) +30, 80 + (move[0] * 80) +30 , 20,20))
+        if self.GAME.currentPlayer == black:
+            availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayer)
+            for move in availMoves:
+                pygame.draw.rect(window , 'White' , (80 + (move[1] *80) +30, 80 + (move[0] * 80) +30 , 20,20))
         
     
     def printGameLogicBoard(self):

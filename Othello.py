@@ -10,10 +10,10 @@ class Othello:
         self.screen = pygame.display.set_mode((800,800))
         pygame.display.set_caption('Othello')
 
-        self.player1 = white
-        self.player2 = black
+        self.player1 = black
+        self.player2 = white
         
-        self.currentPlayer = white
+        self.currentPlayer = black
 
         self.rows = 8
         self.columns = 8
@@ -94,9 +94,9 @@ class Othello:
                 blacks = sum(row.count(black) for row in self.grid.gridLogic)
                 self.whiteCount = whites
                 self.blackCount = blacks
-                if whites > blacks:
+                if whites < blacks:
                     self.resultText = 'You win!'
-                elif whites < blacks:
+                elif whites > blacks:
                     self.resultText = 'You lose.'
                 else:
                     self.resultText = 'Draw.'

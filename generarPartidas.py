@@ -50,7 +50,7 @@ class PartidaSimulada:
             turns.append(currentPlayer)
 
             root = Node(grid=self.grid.gridLogic, player=currentPlayer , availableMoves=self.grid)
-            bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=currentPlayer, availableMoves=self.grid, iterations=10, nn_model=self.nn_model)
+            bestMove = root.UCTSearch(initialState=self.grid.gridLogic, player=currentPlayer, availableMoves=self.grid, iterations=500, nn_model=self.nn_model)
 
             if bestMove:
                 y, x = bestMove
@@ -87,11 +87,11 @@ if __name__ == '__main__':
     all_labels = []
     inicio = time.time()
 
-    for i in range(25):
+    for i in range(200):
         game = PartidaSimulada()
         grid , label = game.jugarPartida()
-        hola = time.time() - inicio
-        print(i , f"{hola:.4f}")
+        tiempoi = time.time() - inicio
+        print(i , f"{tiempoi:.4f}")
         all_grids.extend(grid)
         all_labels.extend(label)
     
